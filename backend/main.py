@@ -9,14 +9,21 @@ import uuid
 from typing import Dict, List, Optional
 from datetime import datetime
 import json
+from dotenv import load_dotenv
 
-# Import routers (to be created)
-# from routers import sessions, users
+# Load environment variables
+load_dotenv()
+
+# Import services
+from services.claude_service import get_claude_service
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
     print("Starting up AI Tutor Training Platform...")
+    # Validate API key
+    if not os.getenv("ANTHROPIC_API_KEY"):
+        print("WARNING: ANTHROPIC_API_KEY not set. AI features will not work.")
     yield
     # Shutdown
     print("Shutting down...")
@@ -75,8 +82,33 @@ async def start_session(session_data: SessionStart):
         "is_active": True
     }
     
-    # TODO: Initialize Claude conversation with persona
-    initial_response = f"Hi! I'm ready to work on this problem: {session_data.math_problem}"
+    # Get initial response from AI persona
+    initial_message = {
+        "content": f"Hello! I need help with this problem: {session_data.math_problem}",
+        "sender": "tutor",
+        "timestamp": datetime.now().isoformat()
+    }
+    
+    active_sessions[session_id]["messages"].append(initial_message)
+    
+    # Get AI response
+    try:
+        claude_service = get_claude_service()
+        initial_response = await claude_service.get_persona_response(
+            messages=[initial_message],
+            persona_type=session_data.persona_type,
+            math_problem=session_data.math_problem
+        )
+    except Exception as e:
+        print(f"Error getting initial response: {e}")
+        initial_response = "Hi! I'm ready to work on this problem. Where should we start?"
+    
+    # Add AI response to history
+    active_sessions[session_id]["messages"].append({
+        "content": initial_response,
+        "sender": "learner",
+        "timestamp": datetime.now().isoformat()
+    })
     
     return SessionResponse(
         session_id=session_id,
@@ -101,8 +133,17 @@ async def send_message(session_id: str, message: Message):
         "timestamp": datetime.now().isoformat()
     })
     
-    # TODO: Get Claude Haiku response based on persona
-    ai_response = "I understand what you're saying. Let me think about that..."
+    # Get Claude Haiku response based on persona
+    try:
+        claude_service = get_claude_service()
+        ai_response = await claude_service.get_persona_response(
+            messages=session["messages"],
+            persona_type=session["persona_type"],
+            math_problem=session["math_problem"]
+        )
+    except Exception as e:
+        print(f"Error getting AI response: {e}")
+        ai_response = "I'm having trouble understanding. Can you explain that differently?"
     
     # Add AI response to history
     session["messages"].append({
@@ -125,18 +166,27 @@ async def end_session(session_id: str):
     session["is_active"] = False
     session["ended_at"] = datetime.now().isoformat()
     
-    # TODO: Get scoring from Claude Sonnet
-    scores = {
-        "scores": {
-            "explanation_clarity": 4,
-            "patience_encouragement": 5,
-            "active_questioning": 3,
-            "adaptability": 4,
-            "mathematical_accuracy": 5
-        },
-        "feedback": "Great job! You showed excellent patience with the student.",
-        "session_summary": "The tutor successfully helped the student understand the concept."
-    }
+    # Get scoring from Claude Sonnet
+    try:
+        claude_service = get_claude_service()
+        scores = await claude_service.get_session_scores(
+            conversation_history=session["messages"],
+            persona_type=session["persona_type"],
+            math_problem=session["math_problem"]
+        )
+    except Exception as e:
+        print(f"Error getting scores: {e}")
+        scores = {
+            "scores": {
+                "explanation_clarity": 3,
+                "patience_encouragement": 3,
+                "active_questioning": 3,
+                "adaptability": 3,
+                "mathematical_accuracy": 3
+            },
+            "feedback": "Session completed. Unable to generate detailed feedback.",
+            "session_summary": "The tutoring session has ended."
+        }
     
     return scores
 

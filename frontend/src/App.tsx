@@ -1,30 +1,98 @@
-import { useState } from 'react'
+import { useState } from 'react';
+import { SessionSetup } from './components/SessionSetup';
+import { ChatInterface } from './components/ChatInterface';
+import { ScoreDisplay } from './components/ScoreDisplay';
+import { sessionApi } from './services/api';
+import type { PersonaType, SessionEndResponse } from './types';
+
+type AppState = 
+  | { type: 'setup' }
+  | { type: 'loading' }
+  | { type: 'chat'; sessionId: string; initialMessage: string; personaName: string; mathProblem: string }
+  | { type: 'scores'; scores: SessionEndResponse };
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [state, setState] = useState<AppState>({ type: 'setup' });
+
+  const handleStartSession = async (
+    tutorName: string, 
+    mathProblem: string, 
+    personaType: PersonaType
+  ) => {
+    setState({ type: 'loading' });
+    
+    try {
+      const response = await sessionApi.startSession({
+        tutor_name: tutorName,
+        math_problem: mathProblem,
+        persona_type: personaType
+      });
+
+      setState({
+        type: 'chat',
+        sessionId: response.session_id,
+        initialMessage: response.initial_response,
+        personaName: response.persona_info.name,
+        mathProblem: mathProblem
+      });
+    } catch (error) {
+      console.error('Error starting session:', error);
+      alert('Failed to start session. Please check your connection and try again.');
+      setState({ type: 'setup' });
+    }
+  };
+
+  const handleEndSession = (scores: SessionEndResponse) => {
+    setState({ type: 'scores', scores });
+  };
+
+  const handleNewSession = () => {
+    setState({ type: 'setup' });
+  };
 
   return (
     <div className="min-h-screen bg-gray-100">
-      <div className="container mx-auto p-4">
-        <h1 className="text-3xl font-bold text-center mb-8">
-          AI Tutor Training Platform
-        </h1>
-        <div className="bg-white rounded-lg shadow-md p-6">
-          <p className="text-gray-600 text-center">
-            Welcome to the AI Tutor Training Platform
-          </p>
-          <div className="mt-4 text-center">
-            <button
-              onClick={() => setCount(count + 1)}
-              className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-            >
-              Count: {count}
-            </button>
+      {state.type === 'setup' && (
+        <div className="container mx-auto py-8">
+          <h1 className="text-3xl font-bold text-center mb-8">
+            AI Tutor Training Platform
+          </h1>
+          <SessionSetup onStart={handleStartSession} />
+        </div>
+      )}
+
+      {state.type === 'loading' && (
+        <div className="flex items-center justify-center min-h-screen">
+          <div className="text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto mb-4"></div>
+            <p className="text-gray-600">Starting session...</p>
           </div>
         </div>
-      </div>
+      )}
+
+      {state.type === 'chat' && (
+        <ChatInterface
+          sessionId={state.sessionId}
+          initialMessage={state.initialMessage}
+          personaName={state.personaName}
+          mathProblem={state.mathProblem}
+          onEnd={handleEndSession}
+        />
+      )}
+
+      {state.type === 'scores' && (
+        <div className="container mx-auto py-8">
+          <h1 className="text-3xl font-bold text-center mb-8">
+            AI Tutor Training Platform
+          </h1>
+          <ScoreDisplay 
+            scores={state.scores} 
+            onNewSession={handleNewSession} 
+          />
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
-export default App
+export default App;

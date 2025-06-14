@@ -1,5 +1,6 @@
 import React from 'react';
 import type { Message } from '../types';
+import { MathMessage } from './MathMessage';
 
 interface MessageBubbleProps {
   message: Message;
@@ -22,7 +23,9 @@ export const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         <div className="text-sm font-semibold mb-1">
           {isTutor ? 'You (Tutor)' : 'Student'}
         </div>
-        <div className="whitespace-pre-wrap">{message.content}</div>
+        <div className="whitespace-pre-wrap">
+          <MathMessage content={message.content} />
+        </div>
         <div className="text-xs opacity-70 mt-1">
           {new Date(message.timestamp).toLocaleTimeString()}
         </div>

@@ -7,6 +7,9 @@ def get_available_personas() -> List[str]:
 
 def load_persona_prompt(persona_type: str, math_problem: str) -> Optional[str]:
     """Load a persona prompt from file and replace placeholders"""
+    # Load the base student constraints
+    base_prompt = load_prompt("base_student.md")
+    
     # Try to load the specific persona
     persona_prompt = load_prompt(f"personas/{persona_type}.md", math_problem=math_problem)
     
@@ -18,4 +21,10 @@ def load_persona_prompt(persona_type: str, math_problem: str) -> Optional[str]:
             print(f"Warning: Persona '{persona_type}' not found. Using '{fallback_persona}' as fallback.")
             persona_prompt = load_prompt(f"personas/{fallback_persona}.md", math_problem=math_problem)
     
-    return persona_prompt
+    # Combine base constraints with persona if both exist
+    if base_prompt and persona_prompt:
+        return f"{base_prompt}\n\n{persona_prompt}"
+    elif persona_prompt:
+        return persona_prompt
+    else:
+        return None

@@ -51,7 +51,7 @@ active_sessions: Dict[str, dict] = {}
 # Pydantic models
 class SessionStart(BaseModel):
     tutor_name: str
-    math_problem: str
+    problem: str
     persona_type: str
 
 class Message(BaseModel):
@@ -105,7 +105,7 @@ async def start_session(session_data: SessionStart):
     active_sessions[session_id] = {
         "id": session_id,
         "tutor_name": session_data.tutor_name,
-        "math_problem": session_data.math_problem,
+        "problem": session_data.problem,
         "persona_type": session_data.persona_type,
         "messages": [],
         "created_at": datetime.now().isoformat(),
@@ -114,7 +114,7 @@ async def start_session(session_data: SessionStart):
     
     # Get initial response from AI persona
     initial_message = {
-        "content": f"Hello! I need help with this problem: {session_data.math_problem}",
+        "content": f"Hello! I need help with this problem: {session_data.problem}",
         "sender": "tutor",
         "timestamp": datetime.now().isoformat()
     }
@@ -127,7 +127,7 @@ async def start_session(session_data: SessionStart):
         initial_response = await claude_service.get_persona_response(
             messages=[initial_message],
             persona_type=session_data.persona_type,
-            math_problem=session_data.math_problem
+            problem=session_data.problem
         )
     except Exception as e:
         print(f"Error getting initial response: {e}")
@@ -169,7 +169,7 @@ async def send_message(session_id: str, message: Message):
         ai_response = await claude_service.get_persona_response(
             messages=session["messages"],
             persona_type=session["persona_type"],
-            math_problem=session["math_problem"]
+            problem=session["problem"]
         )
     except Exception as e:
         print(f"Error getting AI response: {e}")
@@ -202,7 +202,7 @@ async def end_session(session_id: str):
         scores = await claude_service.get_session_scores(
             conversation_history=session["messages"],
             persona_type=session["persona_type"],
-            math_problem=session["math_problem"]
+            problem=session["problem"]
         )
     except Exception as e:
         print(f"Error getting scores: {e}")

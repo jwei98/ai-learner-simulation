@@ -3,13 +3,13 @@ import { Persona, PersonaType } from '../types';
 import { sessionApi } from '../services/api';
 
 interface SessionSetupProps {
-  onStart: (tutorName: string, mathProblem: string, personaType: PersonaType) => void;
+  onStart: (tutorName: string, problem: string, personaType: PersonaType) => void;
   isLoading?: boolean;
 }
 
 export const SessionSetup: React.FC<SessionSetupProps> = ({ onStart, isLoading }) => {
   const [tutorName, setTutorName] = useState('');
-  const [mathProblem, setMathProblem] = useState('');
+  const [problem, setProblem] = useState('');
   const [personaType, setPersonaType] = useState<PersonaType>('');
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [loadingPersonas, setLoadingPersonas] = useState(true);
@@ -35,8 +35,8 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({ onStart, isLoading }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (tutorName.trim() && mathProblem.trim()) {
-      onStart(tutorName.trim(), mathProblem.trim(), personaType);
+    if (tutorName.trim() && problem.trim()) {
+      onStart(tutorName.trim(), problem.trim(), personaType);
     }
   };
 
@@ -61,14 +61,14 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({ onStart, isLoading }
         </div>
 
         <div>
-          <label htmlFor="mathProblem" className="block text-sm font-medium text-gray-700 mb-2">
-            Math Problem
+          <label htmlFor="problem" className="block text-sm font-medium text-gray-700 mb-2">
+            Problem
           </label>
           <textarea
-            id="mathProblem"
-            value={mathProblem}
-            onChange={(e) => setMathProblem(e.target.value)}
-            placeholder="Enter the math problem (e.g., 'Solve for x: 2x + 5 = 13')"
+            id="problem"
+            value={problem}
+            onChange={(e) => setProblem(e.target.value)}
+            placeholder="Enter the problem (e.g., 'Solve for x: 2x + 5 = 13')"
             className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
             rows={3}
             required
@@ -107,7 +107,7 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({ onStart, isLoading }
 
         <button
           type="submit"
-          disabled={isLoading || !tutorName.trim() || !mathProblem.trim()}
+          disabled={isLoading || !tutorName.trim() || !problem.trim()}
           className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? 'Starting Session...' : 'Start Session'}

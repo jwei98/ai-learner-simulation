@@ -21,7 +21,7 @@ export interface Message {
 export interface Session {
   id: string;
   tutorName: string;
-  mathProblem: string;
+  problem: string;
   personaType: PersonaType;
   messages: Message[];
   isActive: boolean;
@@ -31,7 +31,7 @@ export interface Session {
 
 export interface SessionStartRequest {
   tutor_name: string;
-  math_problem: string;
+  problem: string;
   persona_type: PersonaType;
 }
 

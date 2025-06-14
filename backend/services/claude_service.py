@@ -18,12 +18,12 @@ class ClaudeService:
         self, 
         messages: List[Dict[str, str]], 
         persona_type: str,
-        math_problem: str
+        problem: str
     ) -> str:
         """Get a response from Claude Haiku based on the persona type"""
         
         # Get the persona prompt
-        system_prompt = self._get_persona_prompt(persona_type, math_problem)
+        system_prompt = self._get_persona_prompt(persona_type, problem)
         
         # Format messages for Claude API
         claude_messages = self._format_messages_for_claude(messages)
@@ -48,14 +48,14 @@ class ClaudeService:
         self,
         conversation_history: List[Dict[str, str]],
         persona_type: str,
-        math_problem: str
+        problem: str
     ) -> Dict:
         """Get scoring from Claude Sonnet for the tutoring session"""
         
         scoring_prompt = self._get_scoring_prompt(
             conversation_history, 
             persona_type, 
-            math_problem
+            problem
         )
         
         try:
@@ -94,17 +94,18 @@ class ClaudeService:
                 "session_summary": "Session completed."
             }
     
-    def _get_persona_prompt(self, persona_type: str, math_problem: str) -> str:
+    def _get_persona_prompt(self, persona_type: str, problem: str) -> str:
         """Get the system prompt for a specific persona"""
         
         # Use the shared persona service to load the prompt
-        persona_prompt = load_persona_prompt(persona_type, math_problem)
+        persona_prompt = load_persona_prompt(persona_type, problem)
+        print(persona_prompt)
         
         if persona_prompt:
             return persona_prompt
         else:
             # Fallback if persona loading fails
-            return f"You are a high school student working on this problem: {math_problem}. Respond as the {persona_type.replace('_', ' ')} student."
+            return f"You are a high school student working on this problem: {problem}. Respond as the {persona_type.replace('_', ' ')} student."
     
     def _format_messages_for_claude(self, messages: List[Dict[str, str]]) -> List[Dict[str, str]]:
         """Format message history for Claude API"""
@@ -137,7 +138,7 @@ class ClaudeService:
         self, 
         conversation_history: List[Dict[str, str]], 
         persona_type: str,
-        math_problem: str
+        problem: str
     ) -> str:
         """Generate the scoring prompt for Claude Sonnet"""
         
@@ -153,7 +154,7 @@ class ClaudeService:
         # Load the scoring prompt template
         scoring_prompt = load_prompt(
             "scoring.md",
-            math_problem=math_problem,
+            problem=problem,
             persona_name=persona_name,
             conversation=conversation
         )
@@ -163,7 +164,7 @@ class ClaudeService:
             return f"""Analyze this tutoring conversation and score the tutor on 5 dimensions (1-5 scale).
 
 CONTEXT:
-- Math Problem: {math_problem}
+- Problem: {problem}
 - Student Persona: {persona_name}
 - Conversation:
 

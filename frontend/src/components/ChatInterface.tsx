@@ -8,7 +8,7 @@ interface ChatInterfaceProps {
   sessionId: string;
   initialMessage: string;
   personaName: string;
-  mathProblem: string;
+  problem: string;
   onEnd: (scores: SessionEndResponse) => void;
 }
 
@@ -16,7 +16,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
   sessionId,
   initialMessage,
   personaName,
-  mathProblem,
+  problem,
   onEnd
 }) => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -105,7 +105,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <div className="flex justify-between items-start">
           <div>
             <h2 className="text-xl font-semibold">Tutoring Session with {personaName}</h2>
-            <p className="text-sm text-gray-600 mt-1">Problem: {mathProblem}</p>
+            <p className="text-sm text-gray-600 mt-1">Problem: {problem}</p>
           </div>
           <button
             onClick={handleEndSession}

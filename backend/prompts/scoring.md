@@ -1,7 +1,7 @@
 Analyze this tutoring conversation and score the tutor on 5 dimensions (1-5 scale).
 
 CONTEXT:
-- Math Problem: {math_problem}
+- Problem: {problem}
 - Student Persona: {persona_name}
 - Conversation:
 

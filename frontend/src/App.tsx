@@ -8,7 +8,7 @@ import type { PersonaType, SessionEndResponse } from './types';
 type AppState = 
   | { type: 'setup' }
   | { type: 'loading' }
-  | { type: 'chat'; sessionId: string; initialMessage: string; personaName: string; mathProblem: string }
+  | { type: 'chat'; sessionId: string; initialMessage: string; personaName: string; problem: string }
   | { type: 'scores'; scores: SessionEndResponse };
 
 function App() {
@@ -16,7 +16,7 @@ function App() {
 
   const handleStartSession = async (
     tutorName: string, 
-    mathProblem: string, 
+    problem: string, 
     personaType: PersonaType
   ) => {
     setState({ type: 'loading' });
@@ -24,7 +24,7 @@ function App() {
     try {
       const response = await sessionApi.startSession({
         tutor_name: tutorName,
-        math_problem: mathProblem,
+        problem: problem,
         persona_type: personaType
       });
 
@@ -33,7 +33,7 @@ function App() {
         sessionId: response.session_id,
         initialMessage: response.initial_response,
         personaName: response.persona_info.name,
-        mathProblem: mathProblem
+        problem: problem
       });
     } catch (error) {
       console.error('Error starting session:', error);
@@ -75,7 +75,7 @@ function App() {
           sessionId={state.sessionId}
           initialMessage={state.initialMessage}
           personaName={state.personaName}
-          mathProblem={state.mathProblem}
+          problem={state.problem}
           onEnd={handleEndSession}
         />
       )}

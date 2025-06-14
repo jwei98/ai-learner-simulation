@@ -16,6 +16,7 @@ load_dotenv()
 
 # Import services
 from services.claude_service import get_claude_service
+from services.persona_service import get_available_personas
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -66,6 +67,35 @@ class SessionResponse(BaseModel):
 @app.get("/health")
 async def health_check():
     return {"status": "healthy", "timestamp": datetime.now().isoformat()}
+
+@app.get("/api/personas")
+async def get_personas():
+    """Get available AI personas"""
+    try:
+        persona_ids = get_available_personas()
+        
+        # Transform persona IDs into display-friendly format
+        personas = []
+        for persona_id in persona_ids:
+            # Convert snake_case to Title Case for display name
+            display_name = persona_id.replace("_", " ").title()
+            personas.append({
+                "id": persona_id,
+                "name": display_name
+            })
+        
+        return {"personas": personas}
+    except Exception as e:
+        print(f"Error fetching personas: {e}")
+        # Return fallback personas if there's an error
+        return {
+            "personas": [
+                {"id": "struggling_sam", "name": "Struggling Sam"},
+                {"id": "overconfident_olivia", "name": "Overconfident Olivia"},
+                {"id": "anxious_alex", "name": "Anxious Alex"},
+                {"id": "methodical_maya", "name": "Methodical Maya"}
+            ]
+        }
 
 @app.post("/api/sessions/start")
 async def start_session(session_data: SessionStart):

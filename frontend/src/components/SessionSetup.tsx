@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
-import { PERSONAS, PersonaType } from '../types';
+import React, { useState, useEffect } from 'react';
+import { Persona, PersonaType } from '../types';
+import { sessionApi } from '../services/api';
 
 interface SessionSetupProps {
   onStart: (tutorName: string, mathProblem: string, personaType: PersonaType) => void;
@@ -9,7 +10,28 @@ interface SessionSetupProps {
 export const SessionSetup: React.FC<SessionSetupProps> = ({ onStart, isLoading }) => {
   const [tutorName, setTutorName] = useState('');
   const [mathProblem, setMathProblem] = useState('');
-  const [personaType, setPersonaType] = useState<PersonaType>('struggling_sam');
+  const [personaType, setPersonaType] = useState<PersonaType>('');
+  const [personas, setPersonas] = useState<Persona[]>([]);
+  const [loadingPersonas, setLoadingPersonas] = useState(true);
+
+  useEffect(() => {
+    const fetchPersonas = async () => {
+      try {
+        const fetchedPersonas = await sessionApi.getPersonas();
+        setPersonas(fetchedPersonas);
+        // Set default persona to the first one
+        if (fetchedPersonas.length > 0) {
+          setPersonaType(fetchedPersonas[0].id);
+        }
+      } catch (error) {
+        console.error('Failed to fetch personas:', error);
+      } finally {
+        setLoadingPersonas(false);
+      }
+    };
+
+    fetchPersonas();
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,27 +79,30 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({ onStart, isLoading }
           <label className="block text-sm font-medium text-gray-700 mb-2">
             Select Student Persona
           </label>
-          <div className="space-y-2">
-            {PERSONAS.map((persona) => (
-              <label
-                key={persona.type}
-                className="flex items-start p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
-              >
-                <input
-                  type="radio"
-                  name="persona"
-                  value={persona.type}
-                  checked={personaType === persona.type}
-                  onChange={(e) => setPersonaType(e.target.value as PersonaType)}
-                  className="mt-1 mr-3"
-                />
-                <div>
-                  <div className="font-medium">{persona.name}</div>
-                  <div className="text-sm text-gray-600">{persona.description}</div>
-                </div>
-              </label>
-            ))}
-          </div>
+          {loadingPersonas ? (
+            <div className="text-gray-500">Loading personas...</div>
+          ) : (
+            <div className="space-y-2">
+              {personas.map((persona) => (
+                <label
+                  key={persona.id}
+                  className="flex items-start p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50"
+                >
+                  <input
+                    type="radio"
+                    name="persona"
+                    value={persona.id}
+                    checked={personaType === persona.id}
+                    onChange={(e) => setPersonaType(e.target.value)}
+                    className="mt-1 mr-3"
+                  />
+                  <div>
+                    <div className="font-medium">{persona.name}</div>
+                  </div>
+                </label>
+              ))}
+            </div>
+          )}
         </div>
 
         <button

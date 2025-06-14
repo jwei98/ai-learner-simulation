@@ -1,8 +1,9 @@
-export type PersonaType = 
-  | 'struggling_sam' 
-  | 'overconfident_olivia' 
-  | 'anxious_alex' 
-  | 'methodical_maya';
+export type PersonaType = string;
+
+export interface Persona {
+  id: string;
+  name: string;
+}
 
 export interface PersonaInfo {
   name: string;
@@ -67,25 +68,3 @@ export interface SessionEndResponse {
   session_summary: string;
 }
 
-export const PERSONAS: PersonaInfo[] = [
-  {
-    name: 'Struggling Sam',
-    type: 'struggling_sam',
-    description: 'Struggles with basic concepts, needs patience and step-by-step guidance'
-  },
-  {
-    name: 'Overconfident Olivia',
-    type: 'overconfident_olivia',
-    description: 'Rushes to conclusions, resists correction, needs careful guidance'
-  },
-  {
-    name: 'Anxious Alex',
-    type: 'anxious_alex',
-    description: 'Knows the material but lacks confidence, needs encouragement'
-  },
-  {
-    name: 'Methodical Maya',
-    type: 'methodical_maya',
-    description: 'Asks deep questions, wants to understand the "why" behind concepts'
-  }
-];

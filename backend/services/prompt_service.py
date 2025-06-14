@@ -26,7 +26,8 @@ def load_prompt(prompt_path: str, **kwargs: Any) -> Optional[str]:
         
         # Replace placeholders with provided values
         for key, value in kwargs.items():
-            placeholder = f"{{{key}}}"
+            # Use double braces for the placeholder
+            placeholder = "{{" + key + "}}"
             prompt_template = prompt_template.replace(placeholder, str(value))
         
         return prompt_template

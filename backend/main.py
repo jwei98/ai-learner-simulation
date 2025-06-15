@@ -1,14 +1,12 @@
 from fastapi import FastAPI, HTTPException
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 import os
 import uuid
-from typing import Dict, List, Optional
+from typing import Dict
 from datetime import datetime
-import json
 from dotenv import load_dotenv
 
 # Load environment variables
@@ -17,9 +15,10 @@ load_dotenv()
 # Import services
 from services.claude_service import get_claude_service
 from services.persona_service import get_available_personas
+from services.scoring_service import get_scoring_categories, get_default_scores
 
 @asynccontextmanager
-async def lifespan(app: FastAPI):
+async def lifespan(app_instance: FastAPI):
     # Startup
     print("Starting up AI Tutor Training Platform...")
     # Validate API key
@@ -96,6 +95,16 @@ async def get_personas():
                 {"id": "methodical_maya", "name": "Methodical Maya"}
             ]
         }
+
+@app.get("/api/scoring-categories")
+async def get_scoring_categories_endpoint():
+    """Get scoring categories configuration"""
+    try:
+        categories = get_scoring_categories()
+        return {"categories": categories}
+    except Exception as e:
+        print(f"Error fetching scoring categories: {e}")
+        return {"categories": []}
 
 @app.post("/api/sessions/start")
 async def start_session(session_data: SessionStart):
@@ -207,28 +216,7 @@ async def end_session(session_id: str):
     except Exception as e:
         print(f"Error getting scores: {e}")
         scores = {
-            "categories": {
-                "explanation_clarity": {
-                    "score": 3,
-                    "feedback": "Unable to evaluate explanation clarity."
-                },
-                "patience_encouragement": {
-                    "score": 3,
-                    "feedback": "Unable to evaluate patience and encouragement."
-                },
-                "active_questioning": {
-                    "score": 3,
-                    "feedback": "Unable to evaluate active questioning."
-                },
-                "adaptability": {
-                    "score": 3,
-                    "feedback": "Unable to evaluate adaptability."
-                },
-                "mathematical_accuracy": {
-                    "score": 3,
-                    "feedback": "Unable to evaluate mathematical accuracy."
-                }
-            },
+            "categories": get_default_scores(),
             "session_summary": "The tutoring session has ended. Unable to generate detailed analysis."
         }
     

@@ -60,13 +60,7 @@ export interface CategoryScore {
 }
 
 export interface SessionEndResponse {
-  categories: {
-    explanation_clarity: CategoryScore;
-    patience_encouragement: CategoryScore;
-    active_questioning: CategoryScore;
-    adaptability: CategoryScore;
-    mathematical_accuracy: CategoryScore;
-  };
+  categories: Record<string, CategoryScore>;
   session_summary: string;
 }
 

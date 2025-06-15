@@ -17,6 +17,12 @@ const api = axios.create({
   },
 });
 
+export interface ScoringCategory {
+  key: string;
+  label: string;
+  description?: string;
+}
+
 export const sessionApi = {
   async startSession(data: SessionStartRequest): Promise<SessionStartResponse> {
     const response = await api.post<SessionStartResponse>(
@@ -51,6 +57,23 @@ export const sessionApi = {
     } catch (error) {
       console.error("Error fetching personas:", error);
       return [];
+    }
+  },
+
+  async getScoringCategories(): Promise<ScoringCategory[]> {
+    try {
+      const response = await api.get<{ categories: ScoringCategory[] }>("/scoring-categories");
+      return response.data.categories;
+    } catch (error) {
+      console.error("Error fetching scoring categories:", error);
+      // Return default categories as fallback
+      return [
+        { key: 'explanation_clarity', label: 'Explanation Clarity' },
+        { key: 'patience_encouragement', label: 'Patience & Encouragement' },
+        { key: 'active_questioning', label: 'Active Questioning' },
+        { key: 'adaptability', label: 'Adaptability' },
+        { key: 'mathematical_accuracy', label: 'Mathematical Accuracy' }
+      ];
     }
   },
 };

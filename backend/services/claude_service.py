@@ -5,6 +5,7 @@ from anthropic import Anthropic
 import json
 from .persona_service import load_persona_prompt
 from .prompt_service import load_prompt
+from .scoring_service import get_category_keys, get_default_scores, generate_categories_list
 
 class ClaudeService:
     def __init__(self):
@@ -84,7 +85,7 @@ class ClaudeService:
                     
                     # Convert to new format
                     categories = {}
-                    for key in ['explanation_clarity', 'patience_encouragement', 'active_questioning', 'adaptability', 'mathematical_accuracy']:
+                    for key in get_category_keys():
                         score = old_scores.get(key, 3)
                         if isinstance(old_feedback, dict):
                             feedback = old_feedback.get(key, "No specific feedback available.")
@@ -109,28 +110,7 @@ class ClaudeService:
             print(f"Error getting scores: {e}")
             # Return default scores
             return {
-                "categories": {
-                    "explanation_clarity": {
-                        "score": 3,
-                        "feedback": "Unable to evaluate explanation clarity."
-                    },
-                    "patience_encouragement": {
-                        "score": 3,
-                        "feedback": "Unable to evaluate patience and encouragement."
-                    },
-                    "active_questioning": {
-                        "score": 3,
-                        "feedback": "Unable to evaluate active questioning."
-                    },
-                    "adaptability": {
-                        "score": 3,
-                        "feedback": "Unable to evaluate adaptability."
-                    },
-                    "mathematical_accuracy": {
-                        "score": 3,
-                        "feedback": "Unable to evaluate mathematical accuracy."
-                    }
-                },
+                "categories": get_default_scores(),
                 "session_summary": "Session completed. Unable to generate detailed analysis."
             }
     
@@ -191,12 +171,16 @@ class ClaudeService:
         # Convert persona type to display name
         persona_name = persona_type.replace('_', ' ').title()
         
+        # Generate categories list
+        categories_list = generate_categories_list()
+        
         # Load the scoring prompt template
         scoring_prompt = load_prompt(
             "scoring.md",
             problem=problem,
             persona_name=persona_name,
-            conversation=conversation
+            conversation=conversation,
+            categories_list=categories_list
         )
         
         # Fallback if prompt loading fails

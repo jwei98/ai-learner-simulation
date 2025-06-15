@@ -1,22 +1,2 @@
 [build]
-builder = "NIXPACKS"
-buildCommand = "cd frontend && npm install && npm run build && cd .. && cp -r frontend/dist static && cd backend && pip install -r requirements.txt"
-
-[deploy]
-startCommand = "cd backend && uvicorn main:app --host 0.0.0.0 --port $PORT"
-healthcheckPath = "/health"
-healthcheckTimeout = 300
-restartPolicyType = "ON_FAILURE"
-restartPolicyMaxRetries = 10
-
-[[deploy.environmentVariables]]
-name = "ANTHROPIC_API_KEY"
-value = "${{ANTHROPIC_API_KEY}}"
-
-[[deploy.environmentVariables]]
-name = "DATABASE_URL"
-value = "${{DATABASE_URL}}"
-
-[[deploy.environmentVariables]]
-name = "PORT"
-value = "8000"
+builder = "nixpacks"

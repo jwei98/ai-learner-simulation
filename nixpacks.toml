@@ -1,0 +1,14 @@
+providers = ["...", "python"]
+
+[phases.setup]
+nixPkgs = ["...", "python311Packages.pip", "python311Packages.uvicorn"]
+
+
+[phases.build]
+cmds = [
+    "cd backend && pip install --break-system-packages -r requirements.txt",
+    "npm run build",
+]
+
+[phases.start]
+cmd = "cd backend && python -m uvicorn main:app --bind \"[::]:$PORT\""

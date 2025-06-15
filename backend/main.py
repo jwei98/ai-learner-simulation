@@ -192,8 +192,8 @@ async def end_session(session_id: str):
     return scores
 
 # Serve React app in production
-if os.path.exists("../static"):
-    app.mount("/", StaticFiles(directory="../static", html=True), name="static")
+if os.path.exists("../dist"):
+    app.mount("/", StaticFiles(directory="../dist", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn

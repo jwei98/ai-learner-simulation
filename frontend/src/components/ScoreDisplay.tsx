@@ -32,31 +32,26 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ scores, onNewSession
         <h3 className="text-lg font-semibold mb-4">Performance Scores</h3>
         <div className="space-y-4">
           {scoreCategories.map(({ key, label }) => {
-            const score = scores.scores[key as keyof typeof scores.scores];
+            const category = scores.categories[key as keyof typeof scores.categories];
             return (
-              <div key={key}>
+              <div key={key} className="mb-4">
                 <div className="flex justify-between mb-1">
                   <span className="text-sm font-medium">{label}</span>
-                  <span className={`text-sm font-bold ${getScoreColor(score)}`}>
-                    {score}/5
+                  <span className={`text-sm font-bold ${getScoreColor(category.score)}`}>
+                    {category.score}/5
                   </span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-200 rounded-full h-2 mb-2">
                   <div
                     className="bg-blue-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: getScoreBarWidth(score) }}
+                    style={{ width: getScoreBarWidth(category.score) }}
                   />
                 </div>
+                <p className="text-sm text-gray-600 italic">{category.feedback}</p>
               </div>
             );
           })}
         </div>
-      </div>
-
-      {/* Feedback */}
-      <div className="bg-white rounded-lg shadow-md p-6 mb-6">
-        <h3 className="text-lg font-semibold mb-2">Feedback</h3>
-        <p className="text-gray-700">{scores.feedback}</p>
       </div>
 
       {/* Session Summary */}

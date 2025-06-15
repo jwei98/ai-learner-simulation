@@ -75,7 +75,33 @@ class ClaudeService:
             import re
             json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
             if json_match:
-                return json.loads(json_match.group())
+                result = json.loads(json_match.group())
+                
+                # Handle old format - convert to new nested structure
+                if 'scores' in result and 'feedback' in result:
+                    old_scores = result.get('scores', {})
+                    old_feedback = result.get('feedback', {})
+                    
+                    # Convert to new format
+                    categories = {}
+                    for key in ['explanation_clarity', 'patience_encouragement', 'active_questioning', 'adaptability', 'mathematical_accuracy']:
+                        score = old_scores.get(key, 3)
+                        if isinstance(old_feedback, dict):
+                            feedback = old_feedback.get(key, "No specific feedback available.")
+                        else:
+                            feedback = old_feedback if isinstance(old_feedback, str) else "No specific feedback available."
+                        
+                        categories[key] = {
+                            'score': score,
+                            'feedback': feedback
+                        }
+                    
+                    result = {
+                        'categories': categories,
+                        'session_summary': result.get('session_summary', 'Session completed.')
+                    }
+                
+                return result
             else:
                 raise ValueError("No JSON found in response")
                 
@@ -83,15 +109,29 @@ class ClaudeService:
             print(f"Error getting scores: {e}")
             # Return default scores
             return {
-                "scores": {
-                    "explanation_clarity": 3,
-                    "patience_encouragement": 3,
-                    "active_questioning": 3,
-                    "adaptability": 3,
-                    "mathematical_accuracy": 3
+                "categories": {
+                    "explanation_clarity": {
+                        "score": 3,
+                        "feedback": "Unable to evaluate explanation clarity."
+                    },
+                    "patience_encouragement": {
+                        "score": 3,
+                        "feedback": "Unable to evaluate patience and encouragement."
+                    },
+                    "active_questioning": {
+                        "score": 3,
+                        "feedback": "Unable to evaluate active questioning."
+                    },
+                    "adaptability": {
+                        "score": 3,
+                        "feedback": "Unable to evaluate adaptability."
+                    },
+                    "mathematical_accuracy": {
+                        "score": 3,
+                        "feedback": "Unable to evaluate mathematical accuracy."
+                    }
                 },
-                "feedback": "Unable to generate detailed feedback at this time.",
-                "session_summary": "Session completed."
+                "session_summary": "Session completed. Unable to generate detailed analysis."
             }
     
     def _get_persona_prompt(self, persona_type: str, problem: str) -> str:

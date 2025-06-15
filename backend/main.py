@@ -207,15 +207,29 @@ async def end_session(session_id: str):
     except Exception as e:
         print(f"Error getting scores: {e}")
         scores = {
-            "scores": {
-                "explanation_clarity": 3,
-                "patience_encouragement": 3,
-                "active_questioning": 3,
-                "adaptability": 3,
-                "mathematical_accuracy": 3
+            "categories": {
+                "explanation_clarity": {
+                    "score": 3,
+                    "feedback": "Unable to evaluate explanation clarity."
+                },
+                "patience_encouragement": {
+                    "score": 3,
+                    "feedback": "Unable to evaluate patience and encouragement."
+                },
+                "active_questioning": {
+                    "score": 3,
+                    "feedback": "Unable to evaluate active questioning."
+                },
+                "adaptability": {
+                    "score": 3,
+                    "feedback": "Unable to evaluate adaptability."
+                },
+                "mathematical_accuracy": {
+                    "score": 3,
+                    "feedback": "Unable to evaluate mathematical accuracy."
+                }
             },
-            "feedback": "Session completed. Unable to generate detailed feedback.",
-            "session_summary": "The tutoring session has ended."
+            "session_summary": "The tutoring session has ended. Unable to generate detailed analysis."
         }
     
     return scores

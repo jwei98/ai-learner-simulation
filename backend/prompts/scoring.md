@@ -44,14 +44,28 @@ SCORING RUBRIC:
 Return your analysis in this exact JSON format, with nothing besides the JSON in the response:
 <json>
 {
-  "scores": {
-    "explanation_clarity": <1-5>,
-    "patience_encouragement": <1-5>,
-    "active_questioning": <1-5>,
-    "adaptability": <1-5>,
-    "mathematical_accuracy": <1-5>
+  "categories": {
+    "explanation_clarity": {
+      "score": <1-5>,
+      "feedback": "<2-3 sentences of specific feedback on explanation clarity, using concrete examples>"
+    },
+    "patience_encouragement": {
+      "score": <1-5>,
+      "feedback": "<2-3 sentences of specific feedback on patience and encouragement, using concrete examples>"
+    },
+    "active_questioning": {
+      "score": <1-5>,
+      "feedback": "<2-3 sentences of specific feedback on active questioning, using concrete examples>"
+    },
+    "adaptability": {
+      "score": <1-5>,
+      "feedback": "<2-3 sentences of specific feedback on adaptability, using concrete examples>"
+    },
+    "mathematical_accuracy": {
+      "score": <1-5>,
+      "feedback": "<2-3 sentences of specific feedback on mathematical accuracy, using concrete examples>"
+    }
   },
-  "feedback": "<2-3 sentences of specific, actionable feedback>",
-  "session_summary": "<2-3 sentences summarizing the session>"
+  "session_summary": "<2-3 sentences providing overall assessment and key recommendations, using concrete examples>"
 }
 </json>

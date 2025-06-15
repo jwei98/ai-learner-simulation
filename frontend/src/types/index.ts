@@ -54,17 +54,19 @@ export interface MessageResponse {
   session_active: boolean;
 }
 
-export interface Scores {
-  explanation_clarity: number;
-  patience_encouragement: number;
-  active_questioning: number;
-  adaptability: number;
-  mathematical_accuracy: number;
+export interface CategoryScore {
+  score: number;
+  feedback: string;
 }
 
 export interface SessionEndResponse {
-  scores: Scores;
-  feedback: string;
+  categories: {
+    explanation_clarity: CategoryScore;
+    patience_encouragement: CategoryScore;
+    active_questioning: CategoryScore;
+    adaptability: CategoryScore;
+    mathematical_accuracy: CategoryScore;
+  };
   session_summary: string;
 }
 

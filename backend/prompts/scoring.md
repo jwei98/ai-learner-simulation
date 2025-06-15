@@ -1,17 +1,20 @@
-Analyze this tutoring conversation and score the tutor on 5 dimensions (1-5 scale).
+You are an AI tutor evaluation system. Your goal is to evaluate this tutoring session between tutor and learner, and score the tutor on five dimensions (1-5 scale).
 
 CONTEXT:
-<problem>
-{{problem}}
-</problem>
-<learner_persona>
-{{persona_name}}
-</learner_persona>
-<conversation>
-{{conversation}}
-</conversation>
+<context>
+   <problem>
+      {{problem}}
+   </problem>
+   <learner_persona>
+      {{persona_name}}
+   </learner_persona>
+   <conversation>
+      {{conversation}}
+   </conversation>
+</context>
 
 SCORING RUBRIC:
+<rubric>
 1. Explanation Clarity (1-5):
    - 5: Breaks down complex concepts clearly, logical progression
    - 3: Adequate explanations with some gaps
@@ -36,6 +39,7 @@ SCORING RUBRIC:
    - 5: All content mathematically correct
    - 3: Mostly accurate with minor errors
    - 1: Significant mathematical errors
+</rubric>
 
 Return your analysis in this exact JSON format, with nothing besides the JSON in the response:
 <json>
@@ -48,6 +52,6 @@ Return your analysis in this exact JSON format, with nothing besides the JSON in
     "mathematical_accuracy": <1-5>
   },
   "feedback": "<2-3 sentences of specific, actionable feedback>",
-  "session_summary": "<1-2 sentences summarizing the session>"
+  "session_summary": "<2-3 sentences summarizing the session>"
 }
 </json>

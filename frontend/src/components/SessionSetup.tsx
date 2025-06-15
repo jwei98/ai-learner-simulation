@@ -13,6 +13,7 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({ onStart, isLoading }
   const [personaType, setPersonaType] = useState<PersonaType>('');
   const [personas, setPersonas] = useState<Persona[]>([]);
   const [loadingPersonas, setLoadingPersonas] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPersonas = async () => {
@@ -25,6 +26,7 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({ onStart, isLoading }
         }
       } catch (error) {
         console.error('Failed to fetch personas:', error);
+        setError('Failed to load personas. Please refresh the page.');
       } finally {
         setLoadingPersonas(false);
       }
@@ -81,6 +83,10 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({ onStart, isLoading }
           </label>
           {loadingPersonas ? (
             <div className="text-gray-500">Loading personas...</div>
+          ) : error ? (
+            <div className="text-red-500">{error}</div>
+          ) : personas.length === 0 ? (
+            <div className="text-gray-500">No personas available</div>
           ) : (
             <div className="space-y-2">
               {personas.map((persona) => (
@@ -107,7 +113,7 @@ export const SessionSetup: React.FC<SessionSetupProps> = ({ onStart, isLoading }
 
         <button
           type="submit"
-          disabled={isLoading || !tutorName.trim() || !problem.trim()}
+          disabled={isLoading || !tutorName.trim() || !problem.trim() || personas.length === 0}
           className="w-full py-3 bg-blue-500 text-white rounded-lg hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors"
         >
           {isLoading ? 'Starting Session...' : 'Start Session'}

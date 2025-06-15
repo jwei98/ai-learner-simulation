@@ -10,6 +10,7 @@ interface ScoreDisplayProps {
 export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ scores, onNewSession }) => {
   const [scoreCategories, setScoreCategories] = useState<ScoringCategory[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCategories = async () => {
@@ -18,6 +19,7 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ scores, onNewSession
         setScoreCategories(categories);
       } catch (error) {
         console.error('Failed to fetch scoring categories:', error);
+        setError('Failed to load scoring categories');
       } finally {
         setLoading(false);
       }
@@ -43,6 +45,10 @@ export const ScoreDisplay: React.FC<ScoreDisplayProps> = ({ scores, onNewSession
         <h3 className="text-lg font-semibold mb-4">Performance Scores</h3>
         {loading ? (
           <div className="text-center text-gray-500">Loading categories...</div>
+        ) : error ? (
+          <div className="text-center text-red-500">{error}</div>
+        ) : scoreCategories.length === 0 ? (
+          <div className="text-center text-gray-500">No scoring categories available</div>
         ) : (
           <div className="space-y-4">
             {scoreCategories.map(({ key, label }) => {

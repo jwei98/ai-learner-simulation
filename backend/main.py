@@ -15,7 +15,7 @@ load_dotenv()
 # Import services
 from services.claude_service import get_claude_service
 from services.persona_service import get_available_personas
-from services.scoring_service import get_scoring_categories, get_default_scores
+from services.scoring_service import get_scoring_categories
 
 @asynccontextmanager
 async def lifespan(app_instance: FastAPI):
@@ -70,41 +70,25 @@ async def health_check():
 @app.get("/api/personas")
 async def get_personas():
     """Get available AI personas"""
-    try:
-        persona_ids = get_available_personas()
-        
-        # Transform persona IDs into display-friendly format
-        personas = []
-        for persona_id in persona_ids:
-            # Convert snake_case to Title Case for display name
-            display_name = persona_id.replace("_", " ").title()
-            personas.append({
-                "id": persona_id,
-                "name": display_name
-            })
-        
-        return {"personas": personas}
-    except Exception as e:
-        print(f"Error fetching personas: {e}")
-        # Return fallback personas if there's an error
-        return {
-            "personas": [
-                {"id": "struggling_sam", "name": "Struggling Sam"},
-                {"id": "overconfident_olivia", "name": "Overconfident Olivia"},
-                {"id": "anxious_alex", "name": "Anxious Alex"},
-                {"id": "methodical_maya", "name": "Methodical Maya"}
-            ]
-        }
+    persona_ids = get_available_personas()
+    
+    # Transform persona IDs into display-friendly format
+    personas = []
+    for persona_id in persona_ids:
+        # Convert snake_case to Title Case for display name
+        display_name = persona_id.replace("_", " ").title()
+        personas.append({
+            "id": persona_id,
+            "name": display_name
+        })
+    
+    return {"personas": personas}
 
 @app.get("/api/scoring-categories")
 async def get_scoring_categories_endpoint():
     """Get scoring categories configuration"""
-    try:
-        categories = get_scoring_categories()
-        return {"categories": categories}
-    except Exception as e:
-        print(f"Error fetching scoring categories: {e}")
-        return {"categories": []}
+    categories = get_scoring_categories()
+    return {"categories": categories}
 
 @app.post("/api/sessions/start")
 async def start_session(session_data: SessionStart):
@@ -131,16 +115,12 @@ async def start_session(session_data: SessionStart):
     active_sessions[session_id]["messages"].append(initial_message)
     
     # Get AI response
-    try:
-        claude_service = get_claude_service()
-        initial_response = await claude_service.get_persona_response(
-            messages=[initial_message],
-            persona_type=session_data.persona_type,
-            problem=session_data.problem
-        )
-    except Exception as e:
-        print(f"Error getting initial response: {e}")
-        initial_response = "Hi! I'm ready to work on this problem. Where should we start?"
+    claude_service = get_claude_service()
+    initial_response = await claude_service.get_persona_response(
+        messages=[initial_message],
+        persona_type=session_data.persona_type,
+        problem=session_data.problem
+    )
     
     # Add AI response to history
     active_sessions[session_id]["messages"].append({
@@ -173,16 +153,12 @@ async def send_message(session_id: str, message: Message):
     })
     
     # Get Claude Haiku response based on persona
-    try:
-        claude_service = get_claude_service()
-        ai_response = await claude_service.get_persona_response(
-            messages=session["messages"],
-            persona_type=session["persona_type"],
-            problem=session["problem"]
-        )
-    except Exception as e:
-        print(f"Error getting AI response: {e}")
-        ai_response = "I'm having trouble understanding. Can you explain that differently?"
+    claude_service = get_claude_service()
+    ai_response = await claude_service.get_persona_response(
+        messages=session["messages"],
+        persona_type=session["persona_type"],
+        problem=session["problem"]
+    )
     
     # Add AI response to history
     session["messages"].append({
@@ -206,19 +182,12 @@ async def end_session(session_id: str):
     session["ended_at"] = datetime.now().isoformat()
     
     # Get scoring from Claude Sonnet
-    try:
-        claude_service = get_claude_service()
-        scores = await claude_service.get_session_scores(
-            conversation_history=session["messages"],
-            persona_type=session["persona_type"],
-            problem=session["problem"]
-        )
-    except Exception as e:
-        print(f"Error getting scores: {e}")
-        scores = {
-            "categories": get_default_scores(),
-            "session_summary": "The tutoring session has ended. Unable to generate detailed analysis."
-        }
+    claude_service = get_claude_service()
+    scores = await claude_service.get_session_scores(
+        conversation_history=session["messages"],
+        persona_type=session["persona_type"],
+        problem=session["problem"]
+    )
     
     return scores
 

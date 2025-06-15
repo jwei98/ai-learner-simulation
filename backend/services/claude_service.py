@@ -5,7 +5,7 @@ from anthropic import Anthropic
 import json
 from .persona_service import load_persona_prompt
 from .prompt_service import load_prompt
-from .scoring_service import get_category_keys, get_default_scores, generate_categories_list
+from .scoring_service import get_category_keys, generate_categories_list
 
 class ClaudeService:
     def __init__(self):
@@ -29,21 +29,15 @@ class ClaudeService:
         # Format messages for Claude API
         claude_messages = self._format_messages_for_claude(messages)
         
-        try:
-            response = self.client.messages.create(
-                model="claude-3-5-haiku-latest",
-                max_tokens=300,
-                temperature=0.7,
-                system=system_prompt,
-                messages=claude_messages
-            )
-            
-            return response.content[0].text
-            
-        except Exception as e:
-            print(f"Error calling Claude API: {e}")
-            # Fallback response
-            return "I need help with this problem."
+        response = self.client.messages.create(
+            model="claude-3-5-haiku-latest",
+            max_tokens=300,
+            temperature=0.7,
+            system=system_prompt,
+            messages=claude_messages
+        )
+        
+        return response.content[0].text
     
     async def get_session_scores(
         self,
@@ -59,60 +53,58 @@ class ClaudeService:
             problem
         )
         
-        try:
-            response = self.client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=1000,
-                temperature=0,
-                messages=[{
-                    "role": "user",
-                    "content": scoring_prompt
-                }]
-            )
+        response = self.client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1000,
+            temperature=0,
+            messages=[{
+                "role": "user",
+                "content": scoring_prompt
+            }]
+        )
+        
+        # Parse JSON response
+        response_text = response.content[0].text
+        # Extract JSON from response (it might be wrapped in text)
+        import re
+        json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+        if json_match:
+            result = json.loads(json_match.group())
             
-            # Parse JSON response
-            response_text = response.content[0].text
-            # Extract JSON from response (it might be wrapped in text)
-            import re
-            json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
-            if json_match:
-                result = json.loads(json_match.group())
+            # Handle old format - convert to new nested structure
+            if 'scores' in result and 'feedback' in result:
+                old_scores = result.get('scores', {})
+                old_feedback = result.get('feedback', {})
                 
-                # Handle old format - convert to new nested structure
-                if 'scores' in result and 'feedback' in result:
-                    old_scores = result.get('scores', {})
-                    old_feedback = result.get('feedback', {})
+                # Convert to new format
+                categories = {}
+                for key in get_category_keys():
+                    score = old_scores.get(key)
+                    if score is None:
+                        raise ValueError(f"Missing score for category: {key}")
                     
-                    # Convert to new format
-                    categories = {}
-                    for key in get_category_keys():
-                        score = old_scores.get(key, 3)
-                        if isinstance(old_feedback, dict):
-                            feedback = old_feedback.get(key, "No specific feedback available.")
-                        else:
-                            feedback = old_feedback if isinstance(old_feedback, str) else "No specific feedback available."
-                        
-                        categories[key] = {
-                            'score': score,
-                            'feedback': feedback
-                        }
+                    if isinstance(old_feedback, dict):
+                        feedback = old_feedback.get(key)
+                        if feedback is None:
+                            raise ValueError(f"Missing feedback for category: {key}")
+                    else:
+                        feedback = old_feedback if isinstance(old_feedback, str) else None
+                        if feedback is None:
+                            raise ValueError(f"Invalid feedback format")
                     
-                    result = {
-                        'categories': categories,
-                        'session_summary': result.get('session_summary', 'Session completed.')
+                    categories[key] = {
+                        'score': score,
+                        'feedback': feedback
                     }
                 
-                return result
-            else:
-                raise ValueError("No JSON found in response")
-                
-        except Exception as e:
-            print(f"Error getting scores: {e}")
-            # Return default scores
-            return {
-                "categories": get_default_scores(),
-                "session_summary": "Session completed. Unable to generate detailed analysis."
-            }
+                result = {
+                    'categories': categories,
+                    'session_summary': result.get('session_summary', 'Session completed.')
+                }
+            
+            return result
+        else:
+            raise ValueError("No JSON found in response")
     
     def _get_persona_prompt(self, persona_type: str, problem: str) -> str:
         """Get the system prompt for a specific persona"""
@@ -121,11 +113,9 @@ class ClaudeService:
         persona_prompt = load_persona_prompt(persona_type, problem)
         print(persona_prompt)
         
-        if persona_prompt:
-            return persona_prompt
-        else:
-            # Fallback if persona loading fails
-            return f"You are a high school student working on this problem: {problem}. Respond as the {persona_type.replace('_', ' ')} student."
+        if not persona_prompt:
+            raise ValueError(f"Failed to load persona prompt for: {persona_type}")
+        return persona_prompt
     
     def _format_messages_for_claude(self, messages: List[Dict[str, str]]) -> List[Dict[str, str]]:
         """Format message history for Claude API"""
@@ -183,18 +173,8 @@ class ClaudeService:
             categories_list=categories_list
         )
         
-        # Fallback if prompt loading fails
         if not scoring_prompt:
-            return f"""Analyze this tutoring conversation and score the tutor on 5 dimensions (1-5 scale).
-
-CONTEXT:
-- Problem: {problem}
-- Student Persona: {persona_name}
-- Conversation:
-
-{conversation}
-
-Return your analysis in JSON format with scores for: explanation_clarity, patience_encouragement, active_questioning, adaptability, mathematical_accuracy (all 1-5), plus feedback and session_summary fields."""
+            raise ValueError("Failed to load scoring prompt")
         
         return scoring_prompt
 

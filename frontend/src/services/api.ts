@@ -51,30 +51,13 @@ export const sessionApi = {
   },
 
   async getPersonas(): Promise<Persona[]> {
-    try {
-      const response = await api.get<{ personas: Persona[] }>("/personas");
-      return response.data.personas;
-    } catch (error) {
-      console.error("Error fetching personas:", error);
-      return [];
-    }
+    const response = await api.get<{ personas: Persona[] }>("/personas");
+    return response.data.personas;
   },
 
   async getScoringCategories(): Promise<ScoringCategory[]> {
-    try {
-      const response = await api.get<{ categories: ScoringCategory[] }>("/scoring-categories");
-      return response.data.categories;
-    } catch (error) {
-      console.error("Error fetching scoring categories:", error);
-      // Return default categories as fallback
-      return [
-        { key: 'explanation_clarity', label: 'Explanation Clarity' },
-        { key: 'patience_encouragement', label: 'Patience & Encouragement' },
-        { key: 'active_questioning', label: 'Active Questioning' },
-        { key: 'adaptability', label: 'Adaptability' },
-        { key: 'mathematical_accuracy', label: 'Mathematical Accuracy' }
-      ];
-    }
+    const response = await api.get<{ categories: ScoringCategory[] }>("/scoring-categories");
+    return response.data.categories;
   },
 };
 

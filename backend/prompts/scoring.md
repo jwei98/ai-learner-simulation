@@ -1,11 +1,15 @@
 Analyze this tutoring conversation and score the tutor on 5 dimensions (1-5 scale).
 
 CONTEXT:
-- Problem: {problem}
-- Student Persona: {persona_name}
-- Conversation:
-
-{conversation}
+<problem>
+{{problem}}
+</problem>
+<learner_persona>
+{{persona_name}}
+</learner_persona>
+<conversation>
+{{conversation}}
+</conversation>
 
 SCORING RUBRIC:
 1. Explanation Clarity (1-5):
@@ -33,7 +37,8 @@ SCORING RUBRIC:
    - 3: Mostly accurate with minor errors
    - 1: Significant mathematical errors
 
-Return your analysis in this exact JSON format:
+Return your analysis in this exact JSON format, with nothing besides the JSON in the response:
+<json>
 {
   "scores": {
     "explanation_clarity": <1-5>,
@@ -45,3 +50,4 @@ Return your analysis in this exact JSON format:
   "feedback": "<2-3 sentences of specific, actionable feedback>",
   "session_summary": "<1-2 sentences summarizing the session>"
 }
+</json>

@@ -30,7 +30,7 @@ class ClaudeService:
         
         try:
             response = self.client.messages.create(
-                model="claude-3-haiku-20240307",
+                model="claude-3-5-haiku-latest",
                 max_tokens=300,
                 temperature=0.7,
                 system=system_prompt,
@@ -60,7 +60,7 @@ class ClaudeService:
         
         try:
             response = self.client.messages.create(
-                model="claude-3-5-sonnet-20241022",
+                model="claude-sonnet-4-20250514",
                 max_tokens=1000,
                 temperature=0,
                 messages=[{

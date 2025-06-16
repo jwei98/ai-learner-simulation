@@ -2,6 +2,8 @@
 
 An AI-powered platform for training high school tutors through practice sessions with simulated student personas.
 
+https://ai-learner-simulation-production.up.railway.app/
+
 ## Tech Stack
 
 - **Frontend**: React 19 + TypeScript + Tailwind CSS
@@ -21,6 +23,7 @@ An AI-powered platform for training high school tutors through practice sessions
 ### Backend Setup
 
 1. Create a virtual environment:
+
 ```bash
 cd backend
 python -m venv venv
@@ -28,16 +31,19 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 ```
 
 2. Install dependencies:
+
 ```bash
 pip install -r requirements.txt
 ```
 
 3. Copy `.env.example` to `.env` and add your API keys:
+
 ```bash
 cp .env.example .env
 ```
 
 4. Run the backend:
+
 ```bash
 uvicorn main:app --reload
 ```
@@ -45,12 +51,14 @@ uvicorn main:app --reload
 ### Frontend Setup
 
 1. Install dependencies:
+
 ```bash
 cd frontend
 npm install
 ```
 
 2. Run the development server:
+
 ```bash
 npm run dev
 ```

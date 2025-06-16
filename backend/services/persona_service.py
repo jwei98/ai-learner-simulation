@@ -1,21 +1,31 @@
 from typing import List
-from .prompt_service import load_prompt, list_prompts_in_directory
+from .prompt_service import list_available_personas, generate_base_student_prompt, load_persona_content
+from .prompt_types import BaseStudentPromptParams
 
 def get_available_personas() -> List[str]:
-    """Get list of available personas from the personas directory"""
-    return list_prompts_in_directory("personas")
+    """Get list of available personas"""
+    return list_available_personas()
 
 def load_persona_prompt(persona_type: str, problem: str) -> str:
-    """Load a persona prompt from file and replace placeholders
+    """Load a persona prompt and generate the full prompt with parameters
     
+    Args:
+        persona_type: The type of persona (e.g., 'anxious_alex')
+        problem: The problem text to include in the prompt
+        
+    Returns:
+        The formatted prompt string
+        
     Raises:
-        FileNotFoundError: If the persona file doesn't exist
-        Exception: If there's an error loading the prompt
+        ValueError: If the persona type is not found
     """
-    # Load the specific persona
-    persona_content = load_prompt(f"personas/{persona_type}.md")
+    # Load the specific persona content
+    persona_content = load_persona_content(persona_type)
     
-    # Load the base prompt and substitute both problem and persona
-    base_prompt = load_prompt("base_student.md", problem=problem, persona=persona_content)
+    # Generate the base prompt with typed parameters
+    params: BaseStudentPromptParams = {
+        'problem': problem,
+        'persona': persona_content
+    }
     
-    return base_prompt
+    return generate_base_student_prompt(params)

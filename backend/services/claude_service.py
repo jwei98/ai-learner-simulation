@@ -4,7 +4,8 @@ import anthropic
 from anthropic import Anthropic
 import json
 from .persona_service import load_persona_prompt
-from .prompt_service import load_prompt
+from .prompt_service import generate_scoring_prompt
+from .prompt_types import ScoringPromptParams, ConversationMessage
 from .scoring_service import get_category_keys, generate_categories_list
 
 class ClaudeService:
@@ -52,6 +53,8 @@ class ClaudeService:
             persona_type, 
             problem
         )
+
+        print(scoring_prompt)
         
         response = self.client.messages.create(
             model="claude-sonnet-4-20250514",
@@ -62,6 +65,8 @@ class ClaudeService:
                 "content": scoring_prompt
             }]
         )
+
+        print(response)
         
         # Parse JSON response
         response_text = response.content[0].text
@@ -111,7 +116,6 @@ class ClaudeService:
         
         # Use the shared persona service to load the prompt
         persona_prompt = load_persona_prompt(persona_type, problem)
-        print(persona_prompt)
         
         if not persona_prompt:
             raise ValueError(f"Failed to load persona prompt for: {persona_type}")
@@ -152,11 +156,14 @@ class ClaudeService:
     ) -> str:
         """Generate the scoring prompt for Claude Sonnet"""
         
-        # Format conversation
-        conversation = "\n".join([
-            f"{msg['sender'].upper()}: {msg['content']}"
+        # Format conversation as list of messages
+        conversation: List[ConversationMessage] = [
+            {
+                'role': msg['sender'],
+                'content': msg['content']
+            }
             for msg in conversation_history
-        ])
+        ]
         
         # Convert persona type to display name
         persona_name = persona_type.replace('_', ' ').title()
@@ -164,19 +171,16 @@ class ClaudeService:
         # Generate categories list
         categories_list = generate_categories_list()
         
-        # Load the scoring prompt template
-        scoring_prompt = load_prompt(
-            "scoring.md",
-            problem=problem,
-            persona_name=persona_name,
-            conversation=conversation,
-            categories_list=categories_list
-        )
+        # Create typed parameters for scoring prompt
+        params: ScoringPromptParams = {
+            'conversation': conversation,
+            'problem': problem,
+            'persona_name': persona_name,
+            'categories_list': categories_list
+        }
         
-        if not scoring_prompt:
-            raise ValueError("Failed to load scoring prompt")
-        
-        return scoring_prompt
+        # Generate the scoring prompt with typed parameters
+        return generate_scoring_prompt(params)
 
 # Create a singleton instance (will be initialized on first use)
 _claude_service = None

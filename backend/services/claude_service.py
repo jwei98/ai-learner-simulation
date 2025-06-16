@@ -53,28 +53,34 @@ class ClaudeService:
             persona_type, 
             problem
         )
-
-        print(scoring_prompt)
         
         response = self.client.messages.create(
             model="claude-sonnet-4-20250514",
-            max_tokens=1000,
+            max_tokens=4000,  # Increased to ensure complete response
             temperature=0,
             messages=[{
                 "role": "user",
                 "content": scoring_prompt
             }]
         )
-
-        print(response)
         
         # Parse JSON response
         response_text = response.content[0].text
-        # Extract JSON from response (it might be wrapped in text)
+        
+        # Extract JSON from response - look for <json> tags first, then fallback to regex
         import re
-        json_match = re.search(r'\{.*\}', response_text, re.DOTALL)
+        
+        # First try to extract JSON from <json> tags
+        json_match = re.search(r'<json>\s*(\{.*?\})\s*</json>', response_text, re.DOTALL)
+        
+        # If not found in tags, try to find raw JSON
+        if not json_match:
+            json_match = re.search(r'\{[^{}]*"categories"\s*:\s*\{.*?\}\s*,\s*"session_summary"\s*:.*?\}', response_text, re.DOTALL)
+        
         if json_match:
-            result = json.loads(json_match.group())
+            # Use group(1) if we matched with <json> tags, otherwise group(0)
+            json_text = json_match.group(1) if json_match.lastindex else json_match.group(0)
+            result = json.loads(json_text)
             
             # Handle old format - convert to new nested structure
             if 'scores' in result and 'feedback' in result:

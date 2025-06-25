@@ -9,7 +9,6 @@ https://ai-learner-simulation-production.up.railway.app/
 - **Frontend**: React 19 + TypeScript + Tailwind CSS
 - **Backend**: FastAPI + Python 3.9+
 - **AI**: Claude Haiku (conversations) + Claude Sonnet (scoring)
-- **Database**: PostgreSQL
 - **Deployment**: Railway
 
 ## Getting Started
@@ -18,7 +17,6 @@ https://ai-learner-simulation-production.up.railway.app/
 
 - Python 3.9+
 - Node.js 18+
-- PostgreSQL (or use Railway's managed database)
 
 ### Backend Setup
 
